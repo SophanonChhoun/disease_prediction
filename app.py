@@ -14,6 +14,11 @@ CORS(app)
 # model = pickle.load(open('./models/model.pkl', 'rb'))
 
 
+@app.route("/", methods=['GET'])
+def index():
+    return "Hello World."
+
+
 @app.route('/api/predict', methods=['POST'])
 def predict():
     data = request.get_json()
@@ -38,13 +43,26 @@ def predict():
     model = pickle.load(open('./models/model.pkl', 'rb'))
     output = model.predict(df)
 
-    return output[0]
+    return app.response_class(
+        response=json.dumps({
+            "message": output[0],
+        }),
+        status=200,
+        mimetype='application/json'
+    )
 
 
 @app.route('/api/severity', methods=['GET'])
 def severity():
     df_serverity = pd.read_csv('./datasets/original/Symptom-severity.csv')
     symptoms = df_serverity['Symptom'].unique()
+    return app.response_class(
+        response=json.dumps({
+            "data": symptoms.tolist(),
+        }),
+        status=200,
+        mimetype='application/json'
+    )
     return jsonpickle.encode({"symptoms": symptoms.tolist()})
 
 
